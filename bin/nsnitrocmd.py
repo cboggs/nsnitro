@@ -18,6 +18,34 @@ from nsnitro.nsresources.nsacls import NSAcls
 from nsnitro.nsresources.nshanode import NSHANode
 from nsnitro.nsresources.nsservicegroupserverbinding import NSServiceGroupServerBinding
 
+#def changeservicegroupmembership(nitro, operation, servername, servicegroup, serviceport):
+#  svcgrpbinding=NSServiceGroupServerBinding()
+#  svcgrpbinding.set_servername(args.servername)
+#  svcgrpbinding.set_servicegroupname(args.servicegroupname)
+#  svcgrpbinding.set_port(args.serviceport)
+#
+#  switch(operation):
+#    case bind: 
+#      try:
+#        NSServiceGroupServerBinding.add(nitro, svcgrpbinding)
+#        print "bound server %s on port %s to service group %s" % (servername, servicegroupname, serviceport)
+#      except nsnitro.nsexceptions.nsexceptions.NSNitroNserrExist as e:
+#        print "Error: ", e.message
+#      finally:
+#        nitro.logout()
+#        sys.exit(0)
+#
+#    case unbind: 
+#      try:
+#        NSServiceGroupServerBinding.delete(nitro, svcgrpbinding)
+#        print "unbound server %s on port %s from service group %s" % (servername, servicegroupname, serviceport)
+#      except nsnitro.nsexceptions.nsexceptions.NSNitroNserrNoent as e:
+#        print "Error: ", e.message
+#      finally:
+#        nitro.logout()
+#        sys.exit(0)
+
+
 if __name__ == "__main__":
         parser = argparse.ArgumentParser(description='Netscaler NITRO controller')
         parser.add_argument('--lbip', metavar='IP', required=True, help='lb ip address')
@@ -84,8 +112,7 @@ if __name__ == "__main__":
         parser.add_argument('--clearacls', action='store_true', help='clear acls')
         parser.add_argument('--renumberacls', action='store_true', help='renumber acls')
 
-        parser.add_argument('--bindservertoservicegroup', action='store_true', help='bind a server to a service group')
-        parser.add_argument('--unbindserverfromservicegroup', action='store_true', help='bind a server to a service group')
+        parser.add_argument('--changeservicegroupmembership', metavar='OPERATION', help='bind a server to a service group')
         parser.add_argument('--servername', action='store', help='server object to manipulate')
         parser.add_argument('--servicegroupname', action='store', help='service group object to manipulate')
         parser.add_argument('--serviceport', action='store', help='service port')
@@ -101,43 +128,46 @@ if __name__ == "__main__":
         try:
                 nitro.login()
 
-                if args.bindservertoservicegroup:
-                  if not args.servername or not args.servicegroupname or not args.serviceport: 
-                    print "--servername, --servicename, and --serviceport are required for binding a server to a service group"
+                if args.changeservicegroupmembership:
+                  if not (args.servername and args.servicegroupname and args.serviceport and args.changeservicegroupmembership[0]): 
+                    print "OPERATION, --servername, --serviceport, and --servicegroupname are required for changing service group membership"
+                    print "Example: nsnitrocmd.py [...] --changeservicegroupmembership delete --servername host1 --serviceport 443 --servicegroupname svcgrp1"
                     nitro.logout()
                     sys.exit(0)
-                  else:
-                    svcgrpbinding=NSServiceGroupServerBinding()
-                    svcgrpbinding.set_servername(args.servername)
-                    svcgrpbinding.set_servicegroupname(args.servicegroupname)
-                    svcgrpbinding.set_port(args.serviceport)
+
+                  svcgrpbinding=NSServiceGroupServerBinding()
+                  svcgrpbinding.set_servername(args.servername)
+                  svcgrpbinding.set_servicegroupname(args.servicegroupname)
+                  svcgrpbinding.set_port(args.serviceport)
+                  operation = args.changeservicegroupmembership[0]
+
+                  if operation == "a":
                     try:
                       NSServiceGroupServerBinding.add(nitro, svcgrpbinding)
-                      print "bound server %s to service group %s on port %s" % (args.servername, args.servicegroupname, args.serviceport)
+                      print "bound server %s on port %s to service group %s" % (args.servername, args.servicegroupname, args.serviceport)
                     except nsnitro.nsexceptions.nsexceptions.NSNitroNserrExist as e:
                       print "Error: ", e.message
                     finally:
                       nitro.logout()
                       sys.exit(0)
-                    
-                if args.unbindserverfromservicegroup:
-                  if not args.servername or not args.servicegroupname or not args.serviceport: 
-                    print "--servername, --servicename, and --serviceport are required for binding a server to a service group"
-                    nitro.logout()
-                    sys.exit(0)
-                  else:
-                    svcgrpbinding=NSServiceGroupServerBinding()
-                    svcgrpbinding.set_servername(args.servername)
-                    svcgrpbinding.set_servicegroupname(args.servicegroupname)
-                    svcgrpbinding.set_port(args.serviceport)
+
+                  elif operation == "d": 
                     try:
                       NSServiceGroupServerBinding.delete(nitro, svcgrpbinding)
-                      print "unbound server %s from service group %s on port %s" % (args.servername, args.servicegroupname, args.serviceport)
+                      print "unbound server %s on port %s from service group %s" % (args.servername, args.servicegroupname, args.serviceport)
                     except nsnitro.nsexceptions.nsexceptions.NSNitroNserrNoent as e:
                       print "Error: ", e.message
                     finally:
                       nitro.logout()
                       sys.exit(0)
+
+                  else:
+                    print "Unrecognized value for OPERATION - please choose either add or delete"
+                    nitro.logout()
+                    sys.exit(0)
+
+                  nitro.logout()
+                  sys.exit(0)
                     
 
                 if args.addlbvserver:
