@@ -18,34 +18,6 @@ from nsnitro.nsresources.nsacls import NSAcls
 from nsnitro.nsresources.nshanode import NSHANode
 from nsnitro.nsresources.nsservicegroupserverbinding import NSServiceGroupServerBinding
 
-#def changeservicegroupmembership(nitro, operation, servername, servicegroup, serviceport):
-#  svcgrpbinding=NSServiceGroupServerBinding()
-#  svcgrpbinding.set_servername(args.servername)
-#  svcgrpbinding.set_servicegroupname(args.servicegroupname)
-#  svcgrpbinding.set_port(args.serviceport)
-#
-#  switch(operation):
-#    case bind: 
-#      try:
-#        NSServiceGroupServerBinding.add(nitro, svcgrpbinding)
-#        print "bound server %s on port %s to service group %s" % (servername, servicegroupname, serviceport)
-#      except nsnitro.nsexceptions.nsexceptions.NSNitroNserrExist as e:
-#        print "Error: ", e.message
-#      finally:
-#        nitro.logout()
-#        sys.exit(0)
-#
-#    case unbind: 
-#      try:
-#        NSServiceGroupServerBinding.delete(nitro, svcgrpbinding)
-#        print "unbound server %s on port %s from service group %s" % (servername, servicegroupname, serviceport)
-#      except nsnitro.nsexceptions.nsexceptions.NSNitroNserrNoent as e:
-#        print "Error: ", e.message
-#      finally:
-#        nitro.logout()
-#        sys.exit(0)
-
-
 if __name__ == "__main__":
         parser = argparse.ArgumentParser(description='Netscaler NITRO controller')
         parser.add_argument('--lbip', metavar='IP', required=True, help='lb ip address')
